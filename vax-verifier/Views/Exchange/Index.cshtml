@@ -1,0 +1,219 @@
+﻿@{
+    ViewData["Title"] = "Verifier";
+}
+
+<div class="container" id="verfication-container">
+    <div id= "title-wrapper" class="row justify-content-center">
+        <div class="col col-md-auto text-center">
+            <h2>Follow the prompts to receive a <span>Wakandan vaccine passport</span> </h2>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col col-md-auto text-center">
+            <div id="qrText">
+                <pre>
+                     </pre>
+                <h3>
+                    <img src="~/img/authenticator-icon.png" alt="Authenticator icon" style="width: 50px; padding-bottom: 5px;"><br>
+                    Scan with Microsoft Authenticator
+                </h3>
+            </div>
+            <div>
+                <a id="deeplink" style="display:none; margin-top:10px;">Tap to open Authenticator on mobile</a>
+            </div>
+            
+        </div>
+    </div>
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status" id="spinner" style="display:none;">
+            <span class="sr-only"></span>
+        </div>
+    </div>
+    <div class="row justify-content-md-center">
+        <div class="col col-md-auto text-center" id="qrcode"></div>
+    </div>
+    <!-- ping -->
+    <div class="row justify-content-md-center">
+        <div id="pinCodeText" style="display: none; margin-top:10px;" class="col col-md-auto text-center bg-info text-dark"></div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-8 text-center">
+            <div id="message-wrapper" style="margin-bottom:50px; margin-top:50px; display: none">
+                <i class="fas fa-user-check fa-5x" style="margin-bottom:25px; color: #228B22;"></i>
+                <h3 id="message"></h3>
+            </div>
+            <div id="reset-wrapper" style="margin-bottom:50px; margin-top:50px; display: none">
+                <img src="~/img/checked.png" alt="Checkbox!" style="width: 100px; padding-bottom: 5px;"><br>
+                </br>
+                <h1>Vaccine Passport Converted. <span> Welcome to Wakanda!</span></h1>
+                </br>
+                <a asp-area="" asp-controller="Exchange" asp-action="Index" type="button" id="ConvertAgainBtn" class="btn-menu animated fadeInUp scrollto">Convert Another Vaccine Certificate</a>
+            </div>
+        </div>
+    </div>
+    <!-- result -->
+    <div class="row justify-content-center" id="verification-result" style="display: none;">
+        <div class="text-center" style="font-size:1.2em;">
+            <div id="cred-owner"></div>
+            <div id="cred-info"></div>
+        </div>
+        <p> </p>
+        <div class="row justify-content-center">
+            <div class="col-8">
+                <form>
+                    <input style="display:none;" type="text" class="form-control" id="inputFirstName" value="" readonly>
+                    <input style="display:none;" type="text" class="form-control" id="inputLastName" value="" readonly>
+                    <div class="mb-3 text-center">
+                        <a type="button" id="convertBtn" class="btn-menu animated fadeInUp scrollto">Convert Vaccine Passport to Wakandan Vaccine Pass</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/qrcode.min.js"></script>
+<script>
+    var verify = document.getElementById('btn-verify');
+    var spinner = document.getElementById('spinner');
+    var qrcode = new QRCode("qrcode", { width: 200, height: 200 });
+    var respPresentationReq = null;
+    var convertBtn = document.getElementById('convertBtn');
+    var respIssuanceReq = null;
+    var credIssueType = 'WakandaVax';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        var url = `/api/verifier/presentation-request`;
+        spinner.style.display = 'block';
+        fetch(url)
+            .then(function (response) {
+                spinner.style.display='none';
+                response.text()
+                    .catch(error => document.getElementById("message").innerHTML = error)
+                    .then(function (message) {
+                        respPresentationReq = JSON.parse(message);
+                        if (/Android/i.test(navigator.userAgent)) {
+                            console.log(`Android device! Using deep link (${respPresentationReq.url}).`);
+                            window.location.href = respPresentationReq.url; setTimeout(function () {
+                                window.location.href = "https://play.google.com/store/apps/details?id=com.azure.authenticator";
+                            }, 2000);
+                        } else if (/iPhone/i.test(navigator.userAgent)) {
+                            console.log(`iOS device! Using deep link (${respPresentationReq.url}).`);
+                            window.location.replace(respPresentationReq.url);
+                        } else {
+                            console.log(`Not Android or IOS. Generating QR code encoded with ${message}`);
+                            qrcode.makeCode(respPresentationReq.url);
+                            document.getElementById('btn-verify').style.visibility = "hidden";
+                            document.getElementById('qrText').style.display = "block";
+                        }
+                    }).catch(error => { console.log(error.message); })
+            }).catch(error => { console.log(error.message); })
+
+        var checkStatus = setInterval(function () {
+            fetch('api/verifier/presentation-response?id=' + respPresentationReq.requestId)
+                .then(response => response.text())
+                .catch(error => document.getElementById("message").innerHTML = error)
+                .then(response => {
+                    if (response.length > 0) {
+                        console.log(response)
+                        respMsg = JSON.parse(response);
+                        // QR Code scanned
+                        if (respMsg.status == 'request_retrieved') {
+                            document.getElementById('message-wrapper').style.display = "block";
+                            document.getElementById('qrText').style.display = "none";
+                            document.getElementById('qrcode').style.display = "none";
+                            document.getElementById('message').innerHTML = respMsg.message;
+                        }
+                        if (respMsg.status == 'presentation_verified') {
+                            document.getElementById('message').innerHTML = `Welcome to Wakanda, <span> ${respMsg.FirstName}</span>. Your international vaccine pass has been accepted.`;
+                            document.getElementById('verification-result').style.display = "block";
+                            document.getElementById('inputFirstName').value = "James";
+                            document.getElementById('inputLastName').value = "Westall";
+                            clearInterval(checkStatus);
+                        }
+
+                    }
+                })
+        }, 1500); //change this to higher interval if you use ngrok to prevent overloading the free tier service
+    })
+
+    convertBtn.addEventListener('click', () => {
+        document.getElementById('message-wrapper').style.display = "none";
+        var firstName = document.getElementById('inputFirstName').value;
+        var lastName = document.getElementById('inputLastName').value;
+        
+        spinner.style.display = 'block';
+        console.log(credIssueType)
+        console.log(firstName)
+        console.log(lastName)
+
+        var url = `/api/issuer/issuance-request?credType=${credIssueType}&firstName=${firstName}&lastName=${lastName}`;
+        fetch(url)
+        .then(function(response) {
+            spinner.style.display='none';
+            response.text()
+            .catch(error => document.getElementById("message").innerHTML = error)
+            .then(function(message) {
+                respIssuanceReq = JSON.parse(message);
+                if( /Android/i.test(navigator.userAgent) ) {
+                    console.log(`Android device! Using deep link (${respIssuanceReq.url}).`);
+                    window.location.href = respIssuanceReq.url; 
+                    setTimeout(function () {
+                        window.location.href = "https://play.google.com/store/apps/details?id=com.azure.authenticator"; }, 
+                        2000
+                    );
+                } else if (/iPhone/i.test(navigator.userAgent)) {
+                    console.log(`iOS device! Using deep link (${respIssuanceReq.url}).`);
+                    window.location.replace(respIssuanceReq.url);
+                } else {
+                    console.log(`Not Android or IOS. Generating QR code encoded with ${message}`);
+                    qrcode.makeCode(respIssuanceReq.url);
+                    document.getElementById('convertBtn').style.display = "none";
+                    document.getElementById('qrcode').style.display = "block";
+                    document.getElementById('qrText').style.display = "block";
+                    if (respIssuanceReq.pin) {
+                        document.getElementById('pinCodeText').innerHTML = `Pin code: <strong>${respIssuanceReq.pin}</strong>`;
+                        document.getElementById('pinCodeText').style.display = "block";
+                    }
+                }
+            }).catch(error => { console.log(error.message); })
+        }).catch(error => { console.log(error.message); })
+
+        var checkStatus = setInterval(function () {
+            fetch('api/issuer/issuance-response?id=' + respIssuanceReq.requestId )
+                .then(response => response.text())
+                .catch(error => document.getElementById("message").innerHTML = error)
+                .then(response => {
+                    if (response.length > 0) {
+                        console.log(response)
+                        respMsg = JSON.parse(response);
+                        // QR Code scanned, show pincode if pincode is required
+                        if (respMsg.status == 'request_retrieved') {
+                            document.getElementById('message-wrapper').style.display = "block";
+                            document.getElementById('qrText').style.display = "none";
+                            document.getElementById('qrcode').style.display = "none";
+
+                            if (respMsg.pin) {
+                                document.getElementById('pinCodeText').style.display = "visible";
+                            }
+                            document.getElementById('message').innerHTML = respMsg.message;
+                        }
+                        if (respMsg.status == 'issuance_successful') {
+                            document.getElementById('pinCodeText').style.display = "none";
+                            document.getElementById('title-wrapper').style.display = "none";
+                            document.getElementById('message').style.display = "none";
+                            document.getElementById('reset-wrapper').style.display = "block";
+                            setTimeout(() => { window.location.replace("/");; }, 30000);
+                            clearInterval(checkStatus);
+                        }
+                        if (respMsg.status == 'issuance_error') {
+                            document.getElementById('pinCodeText').style.display = "none";
+                            document.getElementById('message').innerHTML = "Issuance error occured, did you enter the wrong pincode? Please refresh the page and try again.";
+                            document.getElementById('payload').innerHTML = `Payload: ${respMsg.payload}`;
+                            clearInterval(checkStatus);
+                        }
+                    }
+                })
+        }, 1500); //change this to higher interval if you use ngrok to prevent overloading the free tier service
+    })
+</script>

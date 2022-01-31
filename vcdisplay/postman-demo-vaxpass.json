@@ -1,0 +1,31 @@
+{
+    "default": {
+      "locale": "en-US",
+      "card": {
+        "title": "Demo Vaccine Pass",
+        "issuedBy": " ",
+        "backgroundColor": "#FFFFFF",
+        "textColor": "#FF0000",
+        "logo": {
+          "uri": "https://shdsydaadvcstg.blob.core.windows.net/aad-vc-logos/syringe-vax-icon.png",
+          "description": "Vaccine Logo"
+        },
+        "description": "This verifiable credential is issued using postman, used for validation of service functionality"
+      },
+      "consent": {
+        "title": "Do you want to get your verifiable credential?",
+        "instructions": "Stay Safe!"
+      },
+      "claims": {
+        "vc.credentialSubject.firstName": {
+          "type": "String",
+          "label": "First name"
+        },
+        "vc.credentialSubject.lastName": {
+          "type": "String",
+          "label": "Last name"
+        }
+      }
+    }
+  }
+  

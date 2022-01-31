@@ -1,0 +1,30 @@
+{
+    "default": {
+      "locale": "en-US",
+      "card": {
+        "title": "Wakanda VaxPass",
+        "issuedBy": "Wakanda Health Authority",
+        "backgroundColor": "#FFFFFF",
+        "textColor": "#663399",
+        "logo": {
+          "uri": "https://shdsydaadvcstg.blob.core.windows.net/aad-vc-logos/localised-wakanda-icon.png",
+          "description": "Wakanda VaxPass Logo"
+        },
+        "description": "This verifiable credential is issued for Citizens and Travellers in Wakanda, used for Vaccine Checkin in required locations!"
+      },
+      "consent": {
+        "title": "Wakanda VaxPass",
+        "instructions": "To stay safe in wakanda, Accept this digital proof of vaccination"
+      },
+      "claims": {
+        "vc.credentialSubject.firstName": {
+          "type": "String",
+          "label": "First name"
+        },
+        "vc.credentialSubject.lastName": {
+          "type": "String",
+          "label": "Last name"
+        }
+      }
+    }
+  }

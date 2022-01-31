@@ -1,0 +1,30 @@
+{
+    "default": {
+      "locale": "en-US",
+      "card": {
+        "title": "Australian VaxPass - DEMO",
+        "issuedBy": "425 Hackathon - DEMO Only",
+        "backgroundColor": "#00843D",
+        "textColor": "#FFCD00",
+        "logo": {
+          "uri": "https://shdsydaadvcstg.blob.core.windows.net/aad-vc-logos/australia-kangaroo-icon.png",
+          "description": "Australia VaxPass Kangaroo Logo"
+        },
+        "description": "This verifiable credential is issued for Citizens and Travellers in Australia, used for Vaccine Checkin in required locations!"
+      },
+      "consent": {
+        "title": "Australian VaxPass",
+        "instructions": "To stay safe in australia, Accept this digital proof of vaccination"
+      },
+      "claims": {
+        "vc.credentialSubject.firstName": {
+          "type": "String",
+          "label": "First name"
+        },
+        "vc.credentialSubject.lastName": {
+          "type": "String",
+          "label": "Last name"
+        }
+      }
+    }
+  }

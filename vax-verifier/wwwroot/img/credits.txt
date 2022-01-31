@@ -1,0 +1,16 @@
+
+hero-bg.png 
+Photo by Ondrej Machart on Unsplash
+https://unsplash.com/@ondrejmachart?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText
+https://unsplash.com/s/photos/australia?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText
+
+
+apple-touch-icon.png
+favicon.png
+Syringe with a drop of blood icon by https://icons8.com
+https://icons8.com/icon/xw4jzVybHk9z/syringe-with-a-drop-of-blood"
+
+
+<a target="_blank" href="https://icons8.com/icon/20993/kangaroo">Kangaroo</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+
+<a href="https://www.flaticon.com/free-icons/tick" title="tick icons">Tick icons created by Roundicons - Flaticon</a>
